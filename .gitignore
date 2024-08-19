@@ -1,0 +1,13 @@
+# Ignore the WordPress core
+/wp-admin/
+/wp-includes/
+/wp-content/cache/
+/wp-content/uploads/
+
+# Ignore local environment files
+.env
+.DS_Store
+*.log
+
+# Ignore anything that might be sensitive
+wp-config.php

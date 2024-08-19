@@ -1,0 +1,14 @@
+{
+    "name": "motors_vehicles_listing/plugin",
+    "description": "Stm vehicles listing",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "MotorsVehiclesListing\\": "includes/class/"
+        }
+    },
+    "config": {
+        "platform-check": false,
+        "optimize-autoloader": true
+    }
+}

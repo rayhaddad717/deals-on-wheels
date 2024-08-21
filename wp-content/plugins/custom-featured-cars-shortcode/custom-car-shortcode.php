@@ -5,10 +5,65 @@ Description: A plugin to create a custom shortcode for displaying featured cars.
 Version: 1.0
 Author: Your Name
 */
+
+function fetchCars(int $limit)
+{
+    try {
+        global $wpdb;
+        //map of all cars
+        $cars = [];
+        //fetch all cars
+        $carsResults = $wpdb->get_results("
+       SELECT post_title, ID
+        FROM wp_posts wpp
+        WHERE wpp.post_type = 'listings'
+        and wpp.post_status = 'publish'
+        LIMIT $limit
+    ");
+        //for each car, i need an image, the name, the description, the year, the drive type, the mileage, and the location
+        foreach ($carsResults as $car) {
+            //fetch all changes
+            $allPostIDSResult = $wpdb->get_results("
+        SELECT ID from wp_posts 
+        WHERE post_parent = $car->ID or ID = $car->ID");
+
+            //save the array of ids
+            $allPostIDSResult = array_map(function ($post) {
+                return $post->ID;
+            }, $allPostIDSResult);
+
+            $allPostIDsString = implode(',', $allPostIDSResult);
+            //fetch the location
+            $locationResults = $wpdb->get_results("
+        SELECT meta_value,meta_key from wp_postmeta 
+        WHERE post_id in ($allPostIDsString) and meta_key = 'stm_car_location'")[0];
+
+            //fetch the title
+            $carTitle = $car->post_title;
+            //fetch the image
+            $carImageResults = $wpdb->get_results("
+        SELECT guid from wp_posts
+        WHERE post_parent in ($allPostIDsString) and post_type = 'attachment' and post_mime_type like 'image/%'
+        ORDER BY ID DESC
+        ")[0];
+            $carImage = $carImageResults->guid;
+            $cars[] = [
+                'title' => $carTitle,
+                'image' => $carImage,
+                'location' => $locationResults->meta_value
+            ];
+        }
+        return $cars;
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
 //  custom function to show dynamic featured contents
 function custom_featured_cars_shortcode($atts)
 {
     global $wpdb;
+
 
     // Attributes with default values
     $atts = shortcode_atts(
@@ -22,32 +77,7 @@ function custom_featured_cars_shortcode($atts)
     // Query to fetch cars from the database
     // Adjust this query based on how your cars are stored in the database
     $atts['limit'] = 6;
-    // inner join wp_postmeta wppm
-    // on wpp.ID = wppm.post_id
-    $cars = [];
-    $results = $wpdb->get_results("
-       SELECT *
-        FROM wp_posts wpp
-        
-        WHERE wpp.post_type = 'listings'
-        and wpp.post_status = 'publish'
-        LIMIT {$atts['limit']}
-    ");
-    foreach (array_slice($results, 0, 3) as $car) {
-        $carImageResults = $wpdb->get_results("
-       SELECT *
-        FROM wp_posts wpp
-        
-        WHERE wpp.post_parent = {$car->ID}
-        and wpp.post_mime_type = 'image/jpeg'
-        LIMIT 1
-    ");
-        $carImage = $carImageResults[0];
-        $cars[] = [
-            'title' => $car->post_title,
-            'image' => $carImage->guid,
-        ];
-    }
+    $cars = fetchCars($atts['limit']);
     echo '<pre> end';
     print_r($cars);
     echo '</pre>';
@@ -86,15 +116,17 @@ function custom_featured_cars_shortcode($atts)
 
                 <!-- wp:columns {"style":{"color":{"background":"#f0c541"}},"className":"price-col"} -->
                 <div class="wp-block-columns price-col has-background" style="background-color:#f0c541"><!-- wp:column -->
-                    <div class="wp-block-column"><!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"16px","fontStyle":"normal","fontWeight":"600"},"color":{"text":"#23393d"}},"className":"m-0 px-3"} -->
-                        <p class="has-text-align-center m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600"><?php echo esc_html__($car['image'], 'auto-car-dealership'); ?></p>
+                    <div class="wp-block-column">
+                        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"16px","fontStyle":"normal","fontWeight":"600"},"color":{"text":"#23393d"}},"className":"m-0 px-3"} -->
+                        <p class="has-text-align-center m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600"><?php echo esc_html__('NEW', 'auto-car-dealership'); ?></p>
                         <!-- /wp:paragraph -->
                     </div>
                     <!-- /wp:column -->
 
                     <!-- wp:column -->
-                    <div class="wp-block-column"><!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"16px","fontStyle":"normal","fontWeight":"600"},"color":{"text":"#23393d"}},"className":"location-text m-0 px-3"} -->
-                        <p class="has-text-align-center location-text m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600"><?php echo esc_html__('Mumbai', 'auto-car-dealership'); ?></p>
+                    <div class="wp-block-column">
+                        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"16px","fontStyle":"normal","fontWeight":"600"},"color":{"text":"#23393d"}},"className":"location-text m-0 px-3"} -->
+                        <p class="has-text-align-center location-text m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600"><?php echo esc_html__($car['location'], 'auto-car-dealership'); ?></p>
                         <!-- /wp:paragraph -->
                     </div>
                     <!-- /wp:column -->
@@ -110,8 +142,10 @@ function custom_featured_cars_shortcode($atts)
                 <!-- /wp:paragraph -->
 
                 <!-- wp:columns {"className":"car-features"} -->
-                <div class="wp-block-columns car-features"><!-- wp:column {"style":{"color":{"background":"#f1eded","text":"#5d5252"}}} -->
-                    <div class="wp-block-column has-text-color has-background" style="color:#5d5252;background-color:#f1eded"><!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"12px","fontStyle":"normal","fontWeight":"600"},"color":{"text":"#5d5252"}},"className":"car-year"} -->
+                <div class="wp-block-columns car-features">
+                    <!-- wp:column {"style":{"color":{"background":"#f1eded","text":"#5d5252"}}} -->
+                    <div class="wp-block-column has-text-color has-background" style="color:#5d5252;background-color:#f1eded">
+                        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"12px","fontStyle":"normal","fontWeight":"600"},"color":{"text":"#5d5252"}},"className":"car-year"} -->
                         <p class="has-text-align-center car-year has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600"><?php echo esc_html__('2017', 'auto-car-dealership'); ?></p>
                         <!-- /wp:paragraph -->
                     </div>
@@ -146,7 +180,7 @@ function custom_featured_cars_shortcode($atts)
         echo '<div class="wp-block-columns car-col">';
         echo '<!-- wp:columns {"className":"car-col"} -->
             <div class="wp-block-columns car-col">';
-        foreach (array_slice($results, 3, 6) as $car) {
+        foreach (array_slice($cars, 3, 6) as $car) {
         ?>
             <!-- wp:column {"className":"car-box"} -->
             <div class="wp-block-column car-box"><!-- wp:image {"id":41,"sizeSlug":"full","linkDestination":"none"} -->

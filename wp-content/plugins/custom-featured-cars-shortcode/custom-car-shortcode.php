@@ -50,7 +50,8 @@ function fetchCars(int $limit)
             $cars[] = [
                 'title' => $carTitle,
                 'image' => $carImage,
-                'location' => $locationResults->meta_value
+                'location' => $locationResults->meta_value,
+                'slug' => get_permalink($car->ID)
             ];
         }
         return $cars;
@@ -87,8 +88,9 @@ function custom_featured_cars_shortcode($atts)
 
 
     <div class="wp-block-columns car-col" style="gap:2rem;">
-        <?php foreach ($cars as $car) : ?>
+        <?php foreach (array_slice($cars, 0, 3) as $car) : ?>
             <div class="wp-block-column car-box">
+
                 <figure class="wp-block-image size-full" style="overflow: hidden; width:100%; aspect-ratio:3/2;">
                     <img src="<?php echo esc_url($car['image']); ?>" alt="" class="wp-image-41" style="object-fit: cover; object-position: center; width: 100%; height: 100%;" />
                 </figure>
@@ -106,7 +108,7 @@ function custom_featured_cars_shortcode($atts)
                 </div>
 
                 <h4 class="has-text-color" style="color:#222222;font-size:14px;font-style:normal;font-weight:700">
-                    <?php echo esc_html__($car['title'], 'auto-car-dealership'); ?>
+                    <a href="<?php echo esc_html__($car['slug'], 'auto-car-dealership') ?>"> <?php echo esc_html__($car['title'], 'auto-car-dealership'); ?></a>
                 </h4>
 
                 <p class="has-text-color" style="color:#847e7e;font-size:14px;font-style:normal;font-weight:500">
@@ -132,15 +134,79 @@ function custom_featured_cars_shortcode($atts)
                         </p>
                     </div>
                 </div>
+
             </div><?php endforeach; ?>
     </div>
 
+    <?php
+    if (count($cars)  <= 3) {
+
+        $output = ob_get_clean();
+        //to debug
+        // echo '<pre>' . htmlspecialchars(preg_replace('/\r|\n|\t| {2,}/', '', $output)) . '</pre>';
+        //remove tabs, newlines, or any consecutive spaces from the output so they are not replaced with empty paragraphs
+        return preg_replace('/\r|\n|\t| {2,}/', '', $output);
+    } else {
+
+        // now row 2
+    ?>
+        <div class="wp-block-columns car-col" style="gap:2rem;">
+            <?php foreach (array_slice($cars, 3, 3) as $car) : ?>
+                <div class="wp-block-column car-box">
+
+                    <figure class="wp-block-image size-full" style="overflow: hidden; width:100%; aspect-ratio:3/2;">
+                        <img src="<?php echo esc_url($car['image']); ?>" alt="" class="wp-image-41" style="object-fit: cover; object-position: center; width: 100%; height: 100%;" />
+                    </figure>
+
+                    <div class="wp-block-columns price-col has-background" style="background-color:#f0c541">
+                        <div class="wp-block-column">
+                            <p class="has-text-align-center m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600">
+                                <?php echo esc_html__('NEW', 'auto-car-dealership'); ?>
+                            </p>
+                        </div>
+
+                        <div class="wp-block-column">
+                            <p class="has-text-align-center location-text m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600"><?php echo esc_html__($car['location'], 'auto-car-dealership'); ?></p>
+                        </div>
+                    </div>
+
+                    <h4 class="has-text-color" style="color:#222222;font-size:14px;font-style:normal;font-weight:700">
+                        <a href="<?php echo esc_html__($car['slug'], 'auto-car-dealership') ?>"> <?php echo esc_html__($car['title'], 'auto-car-dealership'); ?></a>
+                    </h4>
+
+                    <p class="has-text-color" style="color:#847e7e;font-size:14px;font-style:normal;font-weight:500">
+                        <?php echo esc_html__('Sed ut perspiciatis unde omnis iste natus error sit', 'auto-car-dealership'); ?>
+                    </p>
+
+                    <div class="wp-block-columns car-features">
+                        <div class="wp-block-column has-text-color has-background" style="color:#5d5252;background-color:#f1eded">
+                            <p class="has-text-align-center car-year has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
+                                <?php echo esc_html__('2017', 'auto-car-dealership'); ?>
+                            </p>
+                        </div>
+
+                        <div class="wp-block-column has-background" style="background-color:#f1eded">
+                            <p class="has-text-align-center car-auto has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
+                                <?php echo esc_html__('Automatic', 'auto-car-dealership'); ?>
+                            </p>
+                        </div>
+
+                        <div class="wp-block-column has-background" style="background-color:#f1eded">
+                            <p class="has-text-align-center car-capacity has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
+                                <?php echo esc_html__('21,000 miles', 'auto-car-dealership'); ?>
+                            </p>
+                        </div>
+                    </div>
+
+                </div><?php endforeach; ?>
+        </div>
 <?php
-
-
-    $output = ob_get_clean();
-    //remove tabs, newlines, or any consecutive spaces from the output so they are not replaced with empty paragraphs
-    return preg_replace('/\r|\n|\t| {2,}/', '', $output);
+        $output = ob_get_clean();
+        //to debug
+        // echo '<pre>' . htmlspecialchars(preg_replace('/\r|\n|\t| {2,}/', '', $output)) . '</pre>';
+        //remove tabs, newlines, or any consecutive spaces from the output so they are not replaced with empty paragraphs
+        return preg_replace('/\r|\n|\t| {2,}/', '', $output);
+    }
 }
 
 // Register the shortcode

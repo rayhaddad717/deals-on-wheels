@@ -58,12 +58,7 @@ function fetchCars(int $limit)
         return [];
     }
 }
-add_filter('the_content', 'remove_empty_p', 11);
-function remove_empty_p($content)
-{
-    //return preg_replace('#<p>\s*+(<br\s*/*>)?\s*</p>#i', '', $content);
-    return preg_replace('#<p></p>#i', '', $content);
-}
+
 
 // Custom function to show dynamic featured contents
 function custom_featured_cars_shortcode($atts)
@@ -96,64 +91,57 @@ function custom_featured_cars_shortcode($atts)
     // Start output buffering
     ob_start();
 ?>
-    <div class="wp-block-group featured-car-section wow slideInRight delay-1000" style="padding:50px 0;">
-        <h2 class="has-text-align-center has-text-color" style="color:#222222;font-size:28px">FEATURED CARS</h2>
-        <figure class="wp-block-image size-full title-img">
-            <img src="<?php echo esc_url(get_template_directory_uri()) . '/images/car-border.png'; ?>" alt="" class="wp-image-19" />
-        </figure>
-        <p class="has-text-align-center head-text has-text-color" style="color:#8c8282;font-size:14px">
-            <?php echo esc_html__("Lorem Ipsum is simply dummy text of the printing and typesetting industry.", "auto-car-dealership"); ?>
-        </p>
 
-        <div class="wp-block-columns car-col" style="gap:2rem;">
-            <?php foreach ($cars as $car) : ?>
-                <div class="wp-block-column car-box">
-                    <figure class="wp-block-image size-full" style="overflow: hidden; width:100%; aspect-ratio:3/2;">
-                        <img src="<?php echo esc_url($car['image']); ?>" alt="" class="wp-image-41" style="object-fit: cover; object-position: center; width: 100%; height: 100%;" />
-                    </figure>
 
-                    <div class="wp-block-columns price-col has-background" style="background-color:#f0c541">
-                        <div class="wp-block-column">
-                            <p class="has-text-align-center m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600">
-                                <?php echo esc_html__('NEW', 'auto-car-dealership'); ?>
-                            </p>
-                        </div>
+    <div class="wp-block-columns car-col" style="gap:2rem;">
+        <?php foreach ($cars as $car) : ?>
+            <div class="wp-block-column car-box">
+                <figure class="wp-block-image size-full" style="overflow: hidden; width:100%; aspect-ratio:3/2;">
+                    <img src="<?php echo esc_url($car['image']); ?>" alt="" class="wp-image-41" style="object-fit: cover; object-position: center; width: 100%; height: 100%;" />
+                </figure>
 
-                        <div class="wp-block-column">
-                            <p class="has-text-align-center location-text m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600"><?php echo esc_html__($car['location'], 'auto-car-dealership'); ?></p>
-                        </div>
+                <div class="wp-block-columns price-col has-background" style="background-color:#f0c541">
+                    <div class="wp-block-column">
+                        <p class="has-text-align-center m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600">
+                            <?php echo esc_html__('NEW', 'auto-car-dealership'); ?>
+                        </p>
                     </div>
 
-                    <h4 class="has-text-color" style="color:#222222;font-size:14px;font-style:normal;font-weight:700">
-                        <?php echo esc_html__($car['title'], 'auto-car-dealership'); ?>
-                    </h4>
-
-                    <p class="has-text-color" style="color:#847e7e;font-size:14px;font-style:normal;font-weight:500">
-                        <?php echo esc_html__('Sed ut perspiciatis unde omnis iste natus error sit', 'auto-car-dealership'); ?>
-                    </p>
-
-                    <div class="wp-block-columns car-features">
-                        <div class="wp-block-column has-text-color has-background" style="color:#5d5252;background-color:#f1eded">
-                            <p class="has-text-align-center car-year has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
-                                <?php echo esc_html__('2017', 'auto-car-dealership'); ?>
-                            </p>
-                        </div>
-
-                        <div class="wp-block-column has-background" style="background-color:#f1eded">
-                            <p class="has-text-align-center car-auto has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
-                                <?php echo esc_html__('Automatic', 'auto-car-dealership'); ?>
-                            </p>
-                        </div>
-
-                        <div class="wp-block-column has-background" style="background-color:#f1eded">
-                            <p class="has-text-align-center car-capacity has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
-                                <?php echo esc_html__('21,000 miles', 'auto-car-dealership'); ?>
-                            </p>
-                        </div>
+                    <div class="wp-block-column">
+                        <p class="has-text-align-center location-text m-0 px-3 has-text-color" style="color:#23393d;font-size:16px;font-style:normal;font-weight:600"><?php echo esc_html__($car['location'], 'auto-car-dealership'); ?></p>
                     </div>
-                </div><?php endforeach; ?>
-        </div>
+                </div>
+
+                <h4 class="has-text-color" style="color:#222222;font-size:14px;font-style:normal;font-weight:700">
+                    <?php echo esc_html__($car['title'], 'auto-car-dealership'); ?>
+                </h4>
+
+                <p class="has-text-color" style="color:#847e7e;font-size:14px;font-style:normal;font-weight:500">
+                    <?php echo esc_html__('Sed ut perspiciatis unde omnis iste natus error sit', 'auto-car-dealership'); ?>
+                </p>
+
+                <div class="wp-block-columns car-features">
+                    <div class="wp-block-column has-text-color has-background" style="color:#5d5252;background-color:#f1eded">
+                        <p class="has-text-align-center car-year has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
+                            <?php echo esc_html__('2017', 'auto-car-dealership'); ?>
+                        </p>
+                    </div>
+
+                    <div class="wp-block-column has-background" style="background-color:#f1eded">
+                        <p class="has-text-align-center car-auto has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
+                            <?php echo esc_html__('Automatic', 'auto-car-dealership'); ?>
+                        </p>
+                    </div>
+
+                    <div class="wp-block-column has-background" style="background-color:#f1eded">
+                        <p class="has-text-align-center car-capacity has-text-color" style="color:#5d5252;font-size:12px;font-style:normal;font-weight:600">
+                            <?php echo esc_html__('21,000 miles', 'auto-car-dealership'); ?>
+                        </p>
+                    </div>
+                </div>
+            </div><?php endforeach; ?>
     </div>
+
 <?php
 
 

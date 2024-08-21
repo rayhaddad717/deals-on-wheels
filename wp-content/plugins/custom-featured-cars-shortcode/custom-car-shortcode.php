@@ -80,14 +80,7 @@ function custom_featured_cars_shortcode($atts)
 
         return '<p>No featured cars found.</p>';
     }
-    // Temporarily disable wpautop
-    // Check if wpautop filter is active
-    if (has_filter('the_content', 'wpautop')) {
-        echo '<!-- wpautop is active -->';
-    } else {
-    }
-    echo '<!-- wpautop is NOT active -->';
-    remove_filter('the_content', 'wpautop');
+
     // Start output buffering
     ob_start();
 ?>
